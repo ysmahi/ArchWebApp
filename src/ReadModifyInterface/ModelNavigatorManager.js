@@ -1,12 +1,12 @@
-import React from 'react';
-import {Treebeard} from 'react-treebeard';
-import _ from 'lodash';
+import React from 'react'
+import { Treebeard } from 'react-treebeard'
+import _ from 'lodash'
 import { getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
 import { xml2json } from 'xml-js'
 
 // Used : http://brandonclapp.com/arranging-an-array-of-flat-paths-into-a-json-tree-like-structure/
 
-const data = {
+/* const data = {
   name: 'react-treebeard',
   toggled: true,
   children: [
@@ -59,6 +59,7 @@ let paths = [
   'FolderA/FolderF/Item1',
   'ItemInRoot'
 ];
+*/
 
 class ModelNavigatorManager extends React.Component {
   constructor(props){
@@ -72,7 +73,6 @@ class ModelNavigatorManager extends React.Component {
     }
     this.onToggle = this.onToggle.bind(this);
 
-    console.log('tree:', arrangeIntoTree(paths));
   }
 
   componentDidMount() {
@@ -107,9 +107,9 @@ class ModelNavigatorManager extends React.Component {
         .then((content) =>
         {
           let contentElement = atob(content);
-          let jsonContentElement = xml2json(contentElement);
+          let jsonContentElement = JSON.parse(xml2json(contentElement));
           console.log(jsonContentElement);
-          // TODO on monday: pass this data to father component and then to Element Form to display data
+          this.props.jsonElementHandler(jsonContentElement);
         })
     }
   }

@@ -1,4 +1,4 @@
-import axios from 'axios/index';
+import axios from 'axios/index'
 
 const apiUrl = 'https://api.github.com/';
 const reposUrl = 'repos/';

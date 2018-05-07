@@ -95,7 +95,7 @@ class ModelNavigatorManager extends React.Component {
   }
 
   onToggle = (node, toggled) => {
-    // node.id est le lien du repo git
+    // node.id is the path to element in git repo
     if(this.state.cursor){this.state.cursor.active = false;}
     node.active = true;
     if(node.children){ node.toggled = toggled; }
@@ -104,13 +104,35 @@ class ModelNavigatorManager extends React.Component {
     if (!(node.children.length > 0)) {
       // if a leaf is clicked
       getElementContent('ysmahi', 'ArchiTest', node.id)
-        .then((content) =>
-        {
+        .then((content) => {
           let contentElement = atob(content);
           let jsonContentElement = JSON.parse(xml2json(contentElement));
-          console.log(jsonContentElement);
           this.props.jsonElementHandler(jsonContentElement);
         })
+    }
+
+    //if a folder is clicked
+    else if(node.children.length > 0) {
+      // go into children folder to read name of parent folder in folder.xml
+      let promises = node.children.filter(child=>child.children.length > 0)
+        .map(child=>{
+          return new Promise((resolve, reject)=> getElementContent('ysmahi', 'ArchiTest', child.id + '/folder.xml'))}
+        );
+
+      console.log('node children; ;', promises);
+      console.log('type', Array.isArray(promises));
+
+      Promise.all(node.children.filter(child=>child.children.length > 0)
+        .map(child=>{
+          return new Promise((resolve, reject)=> getElementContent('ysmahi', 'ArchiTest', child.id + '/folder.xml'))}
+        ))
+        .then(contentFolders=>{
+          let jsonContentFolder = JSON.parse(xml2json(atob(contentFolders)));
+          console.log('bouboub:', jsonContentFolder);
+          })
+      console.log('my children:', node.children);
+      // TODO: retrieve name of folder in json, then change name of folder in this.dataNavigator.tree
+      // Then setState
     }
   }
 

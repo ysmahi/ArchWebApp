@@ -27,7 +27,6 @@ class ElementForm extends React.Component {
 
   componentDidUpdate() {
     if (this.state.idElement !== this.props.idElement){
-      // TODO : better put a condition on element id
 
       this.setState({
         nameElement: this.props.nameElement,

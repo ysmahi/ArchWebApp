@@ -5,10 +5,12 @@
   "dependencies": {
     "@material-ui/icons": "^1.0.0-beta.43",
     "axios": "^0.18.0",
+    "i": "^0.3.6",
     "lodash": "^4.17.10",
     "material-ui": "^1.0.0-beta.44",
     "material-ui-icons": "^1.0.0-beta.36",
     "prop-types": "latest",
+    "qs": "^6.5.2",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-scripts": "1.1.4",

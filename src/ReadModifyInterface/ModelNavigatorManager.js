@@ -68,8 +68,9 @@ class ModelNavigatorManager extends React.Component {
       dataNavigator: {
         name: 'Architecture Model',
         toggled: true,
-        children: []
-      }
+        children: [],
+      },
+      alreadyToggled: ['']
     }
     this.onToggle = this.onToggle.bind(this);
 
@@ -85,6 +86,7 @@ class ModelNavigatorManager extends React.Component {
 
             let dataNavigator = {
               name: 'Architecture Model',
+              id:'',
               toggled: true,
               children: tree,
             }
@@ -112,27 +114,59 @@ class ModelNavigatorManager extends React.Component {
     }
 
     //if a folder is clicked
-    else if(node.children.length > 0) {
+    else if (node.children.length > 0) {
       // go into children folder to read name of parent folder in folder.xml
-      let promises = node.children.filter(child=>child.children.length > 0)
-        .map(child=>{
-          return new Promise((resolve, reject)=> getElementContent('ysmahi', 'ArchiTest', child.id + '/folder.xml'))}
-        );
 
-      console.log('node children; ;', promises);
-      console.log('type', Array.isArray(promises));
+      if (!this.state.alreadyToggled.includes(node.id)) {
+        // Checks if node already opened to avoid doing unnecessary requests
 
-      Promise.all(node.children.filter(child=>child.children.length > 0)
-        .map(child=>{
-          return new Promise((resolve, reject)=> getElementContent('ysmahi', 'ArchiTest', child.id + '/folder.xml'))}
-        ))
-        .then(contentFolders=>{
-          let jsonContentFolder = JSON.parse(xml2json(atob(contentFolders)));
-          console.log('bouboub:', jsonContentFolder);
+        // Filter to go only in folder children to find folder.xml
+        let arrPromises = node.children.filter(child => child.children.length > 0)
+          .map(child => {
+            return new Promise((resolve, reject) => {
+              resolve(getElementContent('ysmahi', 'ArchiTest', child.id + '/folder.xml'));
+            })
+          });
+
+        // Async retrieval of all folder names
+        Promise.all(arrPromises)
+          .then((contentFolders) => {
+            let treeNavig = this.state.dataNavigator;
+
+            let jsonContentFolder = contentFolders.map(content => JSON.parse(xml2json(atob(content))));
+            let nameFolders = jsonContentFolder.map(cont => cont.elements[0].attributes.name);
+            let nodeCh = getNodeById(node.id, treeNavig).children.filter(el => el.children.length > 0);
+
+            for (let i = 0; i < nameFolders.length; i++) {
+              nodeCh[i].name = nameFolders[i];
+            }
+
+            this.setState({dataNavigator: treeNavig});
           })
-      console.log('my children:', node.children);
-      // TODO: retrieve name of folder in json, then change name of folder in this.dataNavigator.tree
-      // Then setState
+
+        // Retrieval of leaves' name
+        arrPromises = node.children.filter((child => (child.children.length === 0 && child.name !== 'folder.xml')))
+          .map(child => {
+            return new Promise((resolve, reject) => {
+              resolve(getElementContent('ysmahi', 'ArchiTest', child.id));
+            })
+          });
+
+        Promise.all(arrPromises)
+          .then((contentElements) => {
+            let treeNavigator = this.state.dataNavigator;
+            let jsonContentElements = contentElements.map((content) => JSON.parse(xml2json(atob(content))));
+            let nameElements = jsonContentElements.map(content => content.elements[0].attributes.name);
+            let nodeToChange = getNodeById(node.id, treeNavigator);
+
+            for (let i = 0; i < nameElements.length; i++) {
+              nodeToChange.children[i].name = nameElements[i];
+            }
+
+            this.setState({dataNavigator: treeNavigator,
+              alreadyToggled: this.state.alreadyToggled.concat(node.id)});
+          })
+      }
     }
   }
 
@@ -184,3 +218,16 @@ let arrangeIntoTree = (paths) => {
 }
 
 export default ModelNavigatorManager;
+
+let getNodeById = (id, node) => {
+  // https://stackoverflow.com/questions/34903361/find-node-by-id-in-json-tree
+  // to find the node with a specific id in tree
+  var reduce = [].reduce;
+  function runner(result, node){
+    if(result || !node) return result;
+    return node.id === id && node || //is this the proper node?
+      runner(null, node.children) || //process this nodes children
+      reduce.call(Object(node), runner, result);  //maybe this is some ArrayLike Structure
+  }
+  return runner(null, node);
+}

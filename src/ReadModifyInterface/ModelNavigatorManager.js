@@ -1,7 +1,7 @@
 import React from 'react'
 import { Treebeard } from 'react-treebeard'
 import _ from 'lodash'
-import { getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
+import { getBlobSha, getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
 import { xml2json } from 'xml-js'
 
 // Used : http://brandonclapp.com/arranging-an-array-of-flat-paths-into-a-json-tree-like-structure/
@@ -109,7 +109,7 @@ class ModelNavigatorManager extends React.Component {
         .then((content) => {
           let contentElement = atob(content);
           let jsonContentElement = JSON.parse(xml2json(contentElement));
-          this.props.jsonElementHandler(jsonContentElement);
+          this.props.dataElementHandler(jsonContentElement, node.id);
         })
     }
 

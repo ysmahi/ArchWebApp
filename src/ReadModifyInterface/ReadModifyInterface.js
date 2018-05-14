@@ -4,20 +4,19 @@ import ElementForm from './ElementForm'
 import { Button, withStyles } from 'material-ui'
 import './ReadModifyInterface.css'
 import PropTypes from 'prop-types';
-import axios from 'axios/index'
-import * as qs from 'qs'
+import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
+import { json2xml } from 'xml-js'
+import * as cookie from 'react-cookies'
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-  },
 });
 
 class ReadModifyInterface extends React.Component {
   constructor (props) {
     super(props);
 
-    this.jsonElementHandler = this.jsonElementHandler.bind(this);
+    this.dataElementHandler = this.dataElementHandler.bind(this);
+    this.pushChanges = this.pushChanges.bind(this);
 
     this.state = {
       displayedElementForm: '',
@@ -28,7 +27,7 @@ class ReadModifyInterface extends React.Component {
     }
   }
 
-  jsonElementHandler = (jsonElement) => {
+  dataElementHandler = (jsonElement, pathElement) => {
     let properties = {};
     let elementHasProperties = false;
     if (jsonElement.elements[0].hasOwnProperty('elements')) {
@@ -36,29 +35,54 @@ class ReadModifyInterface extends React.Component {
       elementHasProperties = true;
     }
 
-    this.setState({nameElement: jsonElement.elements[0].attributes.name,
-    typeElement: jsonElement.elements[0].name,
-    idElement: jsonElement.elements[0].attributes.id,
-    documentationElement: jsonElement.elements[0].attributes.documentation,
-    propertiesElement: properties,
-    elementHasProperties: elementHasProperties});
+    console.log('name', jsonElement.elements[0].attributes.name);
+    this.setState({
+      nameElement: jsonElement.elements[0].attributes.name,
+      typeElement: jsonElement.elements[0].name,
+      idElement: jsonElement.elements[0].attributes.id,
+      documentationElement: jsonElement.elements[0].attributes.documentation,
+      propertiesElement: properties,
+      elementHasProperties: elementHasProperties,
+      pathElement: pathElement,
+    });
   }
 
-  pushChanges = () => {
+  pushChanges = (nameElement, idElement, documentationElement, propertiesElement) => {
+    let token = cookie.load('token');
+    console.log("dataatata", this.state.propertiesElement + "    " + this.state.nameElement);
 
-    // TODO : Faire la suite que quand le code est bien récupéré, trouver une commande pour dire "une fois que la redirection est faite, code=qs...slice.."
-
+    getBlobSha('ysmahi', 'ArchiTest', this.state.pathElement)
+      .then(blobSha => {
+        let jsonElement = {"elements":
+            [{"type":"element",
+              "name":"archimate:ApplicationComponent",
+              "attributes":{"xmlns:archimate":"http://www.archimatetool.com/archimate",
+                "name":nameElement,
+                "id":idElement,
+                "documentation":documentationElement},
+              "elements":propertiesElement.map(el => {
+                return {
+                  "type": "element",
+                    "name": "properties",
+                    "attributes": {"key": el.key, "value": el.value}
+                }
+              })
+            }]
+        }
+        console.log('xml', json2xml(jsonElement));
+        updateElementInfo('ysmahi', 'ArchiTest', this.state.pathElement, json2xml(jsonElement),
+          blobSha, token, "Axios commit message", "Yazid Smahi", "yazidsmahi@gmail.com");
+    })
   }
 
 
   render() {
-    const {classes} = this.props;
 
     return (
       <div className="TreeFormContainer">
         <div className='ModelNavigatorManager'>
           <ModelNavigatorManager
-          jsonElementHandler={this.jsonElementHandler}/>
+          dataElementHandler={this.dataElementHandler}/>
         </div>
         <div className='ElementForm'>
           <ElementForm nameElement={this.state.nameElement}
@@ -66,11 +90,9 @@ class ReadModifyInterface extends React.Component {
                        idElement={this.state.idElement}
                        documentationElement={this.state.documentationElement}
                        propertiesElement={this.state.propertiesElement}
-                       hasProperties={this.state.elementHasProperties}/>
-          <Button size="medium" className={classes.button}
-          onClick={this.pushChanges}>
-            Push changes
-          </Button>
+                       hasProperties={this.state.elementHasProperties}
+                       pushChanges={this.pushChanges}
+          />
         </div>
       </div>
     );

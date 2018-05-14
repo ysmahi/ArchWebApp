@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextField } from 'material-ui'
+import { Button, TextField } from 'material-ui'
 import PropTypes from 'prop-types'
 import { withStyles } from 'material-ui/styles'
 
@@ -8,6 +8,9 @@ const styles = theme => ({
     marginLeft: theme.spacing.unit,
       marginRight: theme.spacing.unit,
       width: 200,
+  },
+  button: {
+    margin: theme.spacing.unit,
   },
 });
 
@@ -25,8 +28,15 @@ class ElementForm extends React.Component {
     }
   }
 
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
   componentDidUpdate() {
     if (this.state.idElement !== this.props.idElement){
+      console.log('afficiififi', this.props.nameElement);
 
       this.setState({
         nameElement: this.props.nameElement,
@@ -41,6 +51,7 @@ class ElementForm extends React.Component {
 
   render () {
     const { classes } = this.props;
+    console.log('rerednering', this.state.nameElement);
 
     return (
       <div>
@@ -50,7 +61,8 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
-          placeholder={this.state.nameElement}
+          value={this.state.nameElement}
+          onChange={this.handleChange('nameElement')}
           fullWidth
           margin="normal"
         />
@@ -60,7 +72,8 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
-          placeholder={this.state.typeElement}
+          value={this.state.typeElement}
+          onChange={this.handleChange('typeElement')}
           fullWidth
           margin="normal"
         />
@@ -70,7 +83,8 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
-          placeholder={this.state.idElement}
+          value={this.state.idElement}
+          onChange={this.handleChange('idElement')}
           fullWidth
           margin="normal"
         />
@@ -80,7 +94,8 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
-          placeholder={this.state.documentationElement}
+          value={this.state.documentationElement}
+          onChange={this.handleChange('documentationElement')}
           multiline
           rows={4}
           className={classes.textField}
@@ -89,6 +104,14 @@ class ElementForm extends React.Component {
         <div>
         {this.state.hasProperties && (<PropertiesForm arrayProperties={this.state.propertiesElement}/>)}
         </div>
+        <Button size="medium" className={classes.button}
+                onClick={()=>this.props.pushChanges(this.state.nameElement,
+                  this.state.idElement,
+                  this.state.documentationElement,
+                  this.state.propertiesElement
+                )}>
+          Push changes
+        </Button>
       </div>
     );
   }
@@ -112,7 +135,7 @@ const PropertiesForm = ({arrayProperties}) => {
       InputLabelProps={{
         shrink: true,
       }}
-      placeholder={property.value}
+      value={property.value}
       fullWidth
       margin="normal"
       key={property.key}

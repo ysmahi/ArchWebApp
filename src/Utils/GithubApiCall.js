@@ -1,6 +1,6 @@
 import axios from 'axios/index'
 import * as qs from 'qs'
-import cookie from 'react-cookies'
+import { toast } from 'react-toastify'
 
 const apiUrl = 'https://api.github.com/';
 const reposUrl = 'repos/';
@@ -36,6 +36,21 @@ export let getBranchSha = (username, repoName, branchName) => {
   )
 }
 
+export let getBlobSha = (username, repoName, blobPath) => {
+  return new Promise(
+    (resolve, reject) => {
+      axios.get(apiUrl + reposUrl + username + '/' + repoName + '/contents/' + blobPath)
+        .then((response) => {
+          if(response.status === 200) {
+            let branchSha = response.data.sha;
+            resolve(branchSha);
+            reject('Error in getBranchSha');
+          }
+        })
+    }
+  )
+}
+
 export let getNodeTreeRecursive = (username, repoName, BranchSha) => {
   return new Promise(
     (resolve, reject) => {
@@ -63,4 +78,36 @@ export let getElementContent = (username, repoName, pathElement) => {
         })
     }
   )
+}
+
+export let updateElementInfo = (owner, repo, branchOrElementPath, content, sha, token,
+  commitMessage, nameCommitter, emailCommitter) => {
+  return new Promise((resolve, reject) => {
+    let encodedContent = btoa(content);
+
+    let jsonData = {
+      "message": commitMessage,
+      "committer": {
+        "name": nameCommitter,
+        "email": emailCommitter
+      },
+      "content": encodedContent,
+      "sha": sha
+    }
+
+    axios.put('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + branchOrElementPath,
+      jsonData,
+      {headers : {'Authorization': 'Bearer token',
+          'Content-Type': 'application/json'}})
+      .then((response) => {
+        if(response.status === 200){
+          toast.success("Element was updated" , {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          });
+          resolve('Element updated on github');
+          reject('Error in pushElementInfo');
+        }
+      })
+  })
 }

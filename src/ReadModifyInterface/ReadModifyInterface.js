@@ -45,28 +45,9 @@ class ReadModifyInterface extends React.Component {
   }
 
   pushChanges = () => {
-    let getCode = () => {return new Promise((resolve) => {
-        document.location.replace('https://github.com/login/oauth/authorize' + '?client_id=a256b8d17f75ee274bf3');
-        resolve(1);
-      })
-    }
 
-    getCode()
-      .then(response=> {
-        let code = qs.parse(document.location.search.slice(1)).code;
-        console.log('code::::::', code);
-        // TODO : Faire la suite que quand le code est bien récupéré, trouver une commande pour dire "une fois que la redirection est faite, code=qs...slice.."
+    // TODO : Faire la suite que quand le code est bien récupéré, trouver une commande pour dire "une fois que la redirection est faite, code=qs...slice.."
 
-        let dataAccess = {
-          code: code,
-          client_id: 'a256b8d17f75ee274bf3',
-          client_secret: '88f8e3471f02c4a9dd3d5e23fd6fd98cdd1f9fa5'
-        }
-
-        axios.post('https://github.com/login/oauth/access_token', dataAccess, {
-          headers: {'Content-Type': 'application/json'}
-        }).then(response => console.log(response));
-      })
   }
 
 

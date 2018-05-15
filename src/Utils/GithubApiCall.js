@@ -97,7 +97,7 @@ export let updateElementInfo = (owner, repo, branchOrElementPath, content, sha, 
 
     axios.put('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + branchOrElementPath,
       jsonData,
-      {headers : {'Authorization': 'Bearer token',
+      {headers : {'Authorization': 'Bearer ',
           'Content-Type': 'application/json'}})
       .then((response) => {
         if(response.status === 200){

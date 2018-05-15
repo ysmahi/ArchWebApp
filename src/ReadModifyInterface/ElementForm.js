@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, TextField } from 'material-ui'
 import PropTypes from 'prop-types'
 import { withStyles } from 'material-ui/styles'
+import AddPropertiesForm from './AddPropertiesForm'
 
 const styles = theme => ({
   textField: {
@@ -22,9 +23,9 @@ class ElementForm extends React.Component {
       nameElement: 'Name',
       typeElement: 'typeElement',
       idElement:'ID',
-      documentationElement: 'Documentation',
-      propertiesElement: {},
-      hasProperties: false,
+      documentationElement: 'Write documentation here',
+      propertiesElement: [],
+      displayPropertiesAdding: false,
     }
   }
 
@@ -36,8 +37,6 @@ class ElementForm extends React.Component {
 
   componentDidUpdate() {
     if (this.state.idElement !== this.props.idElement){
-      console.log('afficiififi', this.props.nameElement);
-
       this.setState({
         nameElement: this.props.nameElement,
         typeElement: this.props.typeElement,
@@ -51,7 +50,6 @@ class ElementForm extends React.Component {
 
   render () {
     const { classes } = this.props;
-    console.log('rerednering', this.state.nameElement);
 
     return (
       <div>
@@ -102,16 +100,25 @@ class ElementForm extends React.Component {
           margin="normal"
         />
         <div>
-        {this.state.hasProperties && (<PropertiesForm arrayProperties={this.state.propertiesElement}/>)}
+          <PropertiesForm arrayProperties={this.state.propertiesElement}/>
         </div>
-        <Button size="medium" className={classes.button}
-                onClick={()=>this.props.pushChanges(this.state.nameElement,
-                  this.state.idElement,
-                  this.state.documentationElement,
-                  this.state.propertiesElement
-                )}>
-          Push changes
-        </Button>
+        {this.state.displayPropertiesAdding && (<div className="AddPropertiesForm">
+          <AddPropertiesForm />
+        </div>)}
+        <div>
+          <Button size="medium" className={classes.button}
+                  onClick={()=>this.setState({displayPropertiesAdding: true})}>
+            Add properties
+          </Button>
+          <Button size="medium" className={classes.button}
+                  onClick={()=>this.props.pushChanges(this.state.nameElement,
+                    this.state.idElement,
+                    this.state.documentationElement,
+                    this.state.propertiesElement
+                  )}>
+            Push changes
+          </Button>
+        </div>
       </div>
     );
   }

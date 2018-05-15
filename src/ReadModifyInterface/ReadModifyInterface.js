@@ -21,28 +21,35 @@ class ReadModifyInterface extends React.Component {
     this.state = {
       displayedElementForm: '',
       nameElement: 'Name',
+      idElement: 'ID',
       typeElement: 'Type of Element',
-      documentationElement: 'Documentation',
-      properties: {property1: 'value1'},
+      documentationElement: 'Write documentation here',
+      properties: [],
     }
   }
 
+  /* Function that receives model element's informations when a click is done on treeview and that passes it to
+  * the read and modify interface
+  * Args: jsonElement is the json containing informations of element
+  * pathElement is the path of the element in the github repo */
   dataElementHandler = (jsonElement, pathElement) => {
-    let properties = {};
-    let elementHasProperties = false;
+
+    let properties = [];
     if (jsonElement.elements[0].hasOwnProperty('elements')) {
       properties = jsonElement.elements[0].elements.map(el => el.attributes);
-      elementHasProperties = true;
     }
 
-    console.log('name', jsonElement.elements[0].attributes.name);
+    let documentation = jsonElement.elements[0].attributes.documentation;
+    if (documentation === undefined) {
+      documentation = 'Write documentation here';
+    }
+
     this.setState({
       nameElement: jsonElement.elements[0].attributes.name,
       typeElement: jsonElement.elements[0].name,
       idElement: jsonElement.elements[0].attributes.id,
-      documentationElement: jsonElement.elements[0].attributes.documentation,
+      documentationElement: documentation,
       propertiesElement: properties,
-      elementHasProperties: elementHasProperties,
       pathElement: pathElement,
     });
   }

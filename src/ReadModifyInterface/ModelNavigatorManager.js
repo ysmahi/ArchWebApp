@@ -108,6 +108,7 @@ class ModelNavigatorManager extends React.Component {
       getElementContent('ysmahi', 'ArchiTest', node.id)
         .then((content) => {
           let contentElement = atob(content);
+          console.log('content', contentElement);
           let jsonContentElement = JSON.parse(xml2json(contentElement));
           this.props.dataElementHandler(jsonContentElement, node.id);
         })

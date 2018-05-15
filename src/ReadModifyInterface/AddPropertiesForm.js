@@ -18,50 +18,30 @@ class AddPropertiesForm extends React.Component {
   constructor (props){
     super(props);
 
-    let firstNewPropertyForm = [<TextField
-      id="key"
-      label="Property Name"
-      type="search"
-      className={this.props.textField}
-      margin="normal"
-      key={"propForm 0"}
-    />, <TextField
-      id="value"
-      label="Property Value"
-      type="search"
-      className={this.props.textField}
-      margin="normal"
-      key={"propForm 1"}
-    />];
-
     this.state = {
-      propertiesFields: firstNewPropertyForm,
+      name: '',
+      value: '',
     }
   }
 
-  /* Function called when user clicks the 'add a new property' plus symbol */
+  /* Called each time a property field is modified to change the value of the field */
+  handleChangeInPropertiesForm = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
+  /* Called when user clicks the 'add a new property' plus symbol */
   addNewProperty = () => {
-    let propFields = this.state.propertiesFields;
+    this.props.handleNewProperty({
+      'key': this.state.name,
+      'value': this.state.value,
+    })
 
-    let newNamePropField = <TextField
-      id="key"
-      label="Property Name"
-      type="search"
-      className={this.props.textField}
-      margin="normal"
-      key={"propForm " + propFields.length}
-    />
-    let newValuePropField = <TextField
-      id="value"
-      label="Property Value"
-      type="search"
-      className={this.props.textField}
-      margin="normal"
-      key={["propForm", propFields.length + 1].join(' ')}
-    />
-    let newArrayProperties = propFields.concat([newNamePropField, newValuePropField]);
-
-    this.setState({propertiesFields: newArrayProperties});
+    this.setState({
+      name:'',
+      value:''
+    })
   }
 
   render () {
@@ -69,9 +49,26 @@ class AddPropertiesForm extends React.Component {
 
     return (
       <div>
-        <React.Fragment>
-          {this.state.propertiesFields}
-        </React.Fragment>
+        <TextField
+          id="key"
+          label="Property Name"
+          value={this.state.name}
+          type="search"
+          className={this.props.textField}
+          margin="normal"
+          key={"propName"}
+          onChange={this.handleChangeInPropertiesForm('name')}
+        />
+        <TextField
+          id="value"
+          label="Property Value"
+          value={this.state.value}
+          type="search"
+          className={this.props.textField}
+          margin="normal"
+          key={"propValue"}
+          onChange={this.handleChangeInPropertiesForm('value')}
+        />
         <Button variant="fab"
                 color="primary"
                 aria-label="add"

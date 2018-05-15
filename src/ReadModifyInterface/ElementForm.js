@@ -19,6 +19,8 @@ class ElementForm extends React.Component {
   constructor(props) {
     super(props);
 
+    this.handleNewProperty = this.handleNewProperty.bind(this);
+
     this.state = {
       nameElement: 'Name',
       typeElement: 'typeElement',
@@ -30,10 +32,20 @@ class ElementForm extends React.Component {
   }
 
   handleChange = name => event => {
+    console.log('name', name);
+    console.log('value', event.target.value);
+    console.log('state', this.state);
     this.setState({
       [name]: event.target.value,
     });
   };
+
+  handleNewProperty = (jsonKeyValue) => {
+    this.setState({
+      propertiesElement: this.state.propertiesElement.concat(jsonKeyValue),
+      displayPropertiesAdding: false,
+    });
+  }
 
   componentDidUpdate() {
     if (this.state.idElement !== this.props.idElement){
@@ -102,10 +114,12 @@ class ElementForm extends React.Component {
         <div>
           <PropertiesForm arrayProperties={this.state.propertiesElement}/>
         </div>
-        {this.state.displayPropertiesAdding && (<div className="AddPropertiesForm">
-          <AddPropertiesForm />
+        {this.state.displayPropertiesAdding && (
+          <div className="AddPropertiesForm">
+          <AddPropertiesForm handleNewProperty={this.handleNewProperty}/>
         </div>)}
-        <div>
+        {!this.state.displayPropertiesAdding && (
+          <div>
           <Button size="medium" className={classes.button}
                   onClick={()=>this.setState({displayPropertiesAdding: true})}>
             Add properties
@@ -118,7 +132,7 @@ class ElementForm extends React.Component {
                   )}>
             Push changes
           </Button>
-        </div>
+        </div>)}
       </div>
     );
   }

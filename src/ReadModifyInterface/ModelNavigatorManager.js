@@ -1,7 +1,7 @@
 import React from 'react'
 import { Treebeard } from 'react-treebeard'
 import _ from 'lodash'
-import { getBlobSha, getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
+import { getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
 import { xml2json } from 'xml-js'
 
 // Used : http://brandonclapp.com/arranging-an-array-of-flat-paths-into-a-json-tree-like-structure/

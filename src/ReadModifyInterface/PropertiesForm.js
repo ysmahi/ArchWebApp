@@ -50,9 +50,6 @@ class PropertiesForm extends React.Component {
   }
 
   handleChange = name => event => {
-    console.log('name', name);
-    console.log('event', event.target.value);
-    console.log('state', this.state);
     this.setState({
       [name]: event.target.value,
     });

@@ -5,3 +5,7 @@
 .ElementForm {
     margin-left: 2%;
 }
+
+.ModelNavigatorManager ul li div ul li div{
+    display: flex;
+}

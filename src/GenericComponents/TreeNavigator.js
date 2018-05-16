@@ -1,9 +1,9 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import ListSubheader from 'material-ui/List/ListSubheader';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import { EndTreeElement, CollapsableTreeElement } from './TreeElement'
+import React from 'react'
+import PropTypes from 'prop-types'
+import { withStyles } from 'material-ui/styles'
+import ListSubheader from 'material-ui/List/ListSubheader'
+import List from 'material-ui/List'
+import { CollapsableTreeElement, EndTreeElement } from './TreeElement'
 
 const styles = theme => ({
   root: {

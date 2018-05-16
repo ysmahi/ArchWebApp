@@ -1,16 +1,12 @@
-import React from 'react';
-import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Collapse from 'material-ui/transitions/Collapse';
-import FolderIcon from '@material-ui/icons/Folder';
-import InsertDriveFile from '@material-ui/icons/InsertDriveFile';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-
+import React from 'react'
+import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
+import Collapse from 'material-ui/transitions/Collapse'
+import FolderIcon from '@material-ui/icons/Folder'
+import InsertDriveFile from '@material-ui/icons/InsertDriveFile'
+import ExpandLess from '@material-ui/icons/ExpandLess'
+import ExpandMore from '@material-ui/icons/ExpandMore'
 
 export class EndTreeElement extends React.Component {
-  constructor (props) {
-    super(props);
-  }
 
   render () {
     return(

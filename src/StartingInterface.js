@@ -1,6 +1,4 @@
-import React, { Component } from 'react';
-import axios from 'axios/index'
-import { xml2json, json2xml } from 'xml-js'
+import React, { Component } from 'react'
 import TreeNavigator from './GenericComponents/TreeNavigator'
 
 class StartingInterface extends Component {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, TextField, withStyles } from 'material-ui'
-import AddIcon from '@material-ui/icons/Add';
-import PropTypes from 'prop-types';
+import AddIcon from '@material-ui/icons/Add'
+import PropTypes from 'prop-types'
 
 const styles = theme => ({
   textField: {

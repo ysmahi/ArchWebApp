@@ -1,12 +1,13 @@
 import React from 'react'
 import ModelNavigatorManager from './ModelNavigatorManager'
 import ElementForm from './ElementForm'
-import { Button, withStyles } from 'material-ui'
+import { withStyles } from 'material-ui'
 import './ReadModifyInterface.css'
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'
 import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
 import { json2xml } from 'xml-js'
 import * as cookie from 'react-cookies'
+import * as formatXml from 'xml-formatter'
 
 const styles = theme => ({
 });
@@ -56,28 +57,44 @@ class ReadModifyInterface extends React.Component {
 
   pushChanges = (nameElement, idElement, documentationElement, propertiesElement) => {
     let token = cookie.load('token');
-    console.log("dataatata", this.state.propertiesElement + "    " + this.state.nameElement);
 
     getBlobSha('ysmahi', 'ArchiTest', this.state.pathElement)
       .then(blobSha => {
         let jsonElement = {"elements":
             [{"type":"element",
               "name":"archimate:ApplicationComponent",
-              "attributes":{"xmlns:archimate":"http://www.archimatetool.com/archimate",
-                "name":nameElement,
-                "id":idElement,
-                "documentation":documentationElement},
+              "attributes":{"\n    xmlns:archimate":"http://www.archimatetool.com/archimate",
+                "\n    name":nameElement,
+                "\n    id":idElement,
+                "\n    documentation":documentationElement},
               "elements":propertiesElement.map(el => {
                 return {
                   "type": "element",
                     "name": "properties",
-                    "attributes": {"key": el.key, "value": el.value}
+                    "attributes": {"\n      key": el.key, "\n      value": el.value}
                 }
               })
             }]
         }
-        console.log('xml', json2xml(jsonElement));
-        updateElementInfo('ysmahi', 'ArchiTest', this.state.pathElement, json2xml(jsonElement),
+        let xmlModif = json2xml(jsonElement).replaceAll('>', '>0&a');
+        xmlModif = xmlModif.split('0&a');
+        let newXml = xmlModif.map((el, index)=>{
+          if(index !== 0){
+            if(el[1] !== '/'){
+              return el.replace(/</, '\n  <');
+            }
+
+            else {
+              return el.replace(/</, '\n<');
+            }
+          }
+
+          else {return el;}
+        }).join('');
+
+        let finalXml = newXml.replaceAll('\n', '\n1&a').split('1&a').map((el)=>el.replace(' \n','\n'));
+
+        updateElementInfo('ysmahi', 'ArchiTest', this.state.pathElement, finalXml.join('').concat('\n'),
           blobSha, token, "Axios commit message", "Yazid Smahi", "yazidsmahi@gmail.com");
     })
   }
@@ -111,3 +128,8 @@ ReadModifyInterface.propTypes = {
 };
 
 export default withStyles(styles)(ReadModifyInterface);
+
+String.prototype.replaceAll = function(search, replacement) {
+  var target = this;
+  return target.split(search).join(replacement);
+};

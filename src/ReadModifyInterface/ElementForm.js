@@ -3,6 +3,7 @@ import { Button, TextField } from 'material-ui'
 import PropTypes from 'prop-types'
 import { withStyles } from 'material-ui/styles'
 import AddPropertiesForm from './AddPropertiesForm'
+import PropertiesForm from './PropertiesForm'
 
 const styles = theme => ({
   textField: {
@@ -32,14 +33,13 @@ class ElementForm extends React.Component {
   }
 
   handleChange = name => event => {
-    console.log('name', name);
-    console.log('value', event.target.value);
-    console.log('state', this.state);
     this.setState({
       [name]: event.target.value,
     });
   };
 
+  /* Imposes re-render so that the new property is taken into account
+   * Called by child component AddPropertiesForm */
   handleNewProperty = (jsonKeyValue) => {
     this.setState({
       propertiesElement: this.state.propertiesElement.concat(jsonKeyValue),
@@ -112,7 +112,9 @@ class ElementForm extends React.Component {
           margin="normal"
         />
         <div>
-          <PropertiesForm arrayProperties={this.state.propertiesElement}/>
+          <PropertiesForm arrayProperties={this.state.propertiesElement}
+                          idElement={this.state.idElement}
+                          onRef={ref => (this.refPropForm = ref)}/>
         </div>
         {this.state.displayPropertiesAdding && (
           <div className="AddPropertiesForm">
@@ -143,27 +145,3 @@ ElementForm.propTypes = {
 };
 
 export default withStyles(styles)(ElementForm);
-
-/* Creates the block of element properties text fields
- * Params: array of json defined properties {key: name_of_property,
-  * value: value_of_property } */
-const PropertiesForm = ({arrayProperties}) => {
-
-  let finalCompo = arrayProperties.map((property) => (
-    <TextField
-      id="full-width"
-      label={property.key}
-      InputLabelProps={{
-        shrink: true,
-      }}
-      value={property.value}
-      fullWidth
-      margin="normal"
-      key={property.key}
-    />
-  ));
-
-  return(<React.Fragment>
-    {finalCompo}
-  </React.Fragment>);
-}

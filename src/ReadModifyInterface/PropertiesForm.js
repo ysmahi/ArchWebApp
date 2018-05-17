@@ -3,6 +3,17 @@
   * value: value_of_property } */
 import React from 'react'
 import { TextField } from 'material-ui'
+import DeleteIcon from '@material-ui/icons/Delete'
+import PropTypes from 'prop-types'
+import { withStyles } from '@material-ui/core/styles'
+import Button from '@material-ui/core/Button'
+import _ from 'lodash'
+
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit,
+  },
+});
 
 class PropertiesForm extends React.Component {
   constructor (props) {
@@ -49,34 +60,55 @@ class PropertiesForm extends React.Component {
   getArrayProperties = () => {
     let arrayProperties = this.state.arrayProperties.map(property=>{
       return {key: property.key,
-      value: this.state[property.key]}
+        value: this.state[property.key]}
     });
 
     this.setState({arrayProperties: arrayProperties});
     return arrayProperties;
   }
 
+  /* Updates state in real time when user is typing in a text field */
   handleChange = name => event => {
     this.setState({
       [name]: event.target.value,
     });
   };
 
+  /* Deletes the property from state and notifies parent components */
+  deleteProperty = (property, index) => {
+    let newState = _.clone(this.state);
+    delete newState[property.key];
+    newState.arrayProperties.splice(index, 1);
+    console.log('state after delete', newState);
+    this.props.deleteProperty(newState.arrayProperties);
+    this.setState(newState);
+  }
+
   render () {
-    let finalCompo = this.state.arrayProperties.map((property, index) => (
-      <TextField
-        id="full-width"
-        label={property.key}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        value={this.state[property.key]}
-        fullWidth
-        margin="normal"
-        key={property.key}
-        onChange={this.handleChange(property.key)}
-      />
-    ));
+    const {classes} = this.props;
+
+    let finalCompo = this.state.arrayProperties.map((property, index) => {
+      return (
+        <div className="property" key={property.key}>
+          <TextField
+            id="full-width"
+            label={property.key}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={this.state[property.key]}
+            fullWidth
+            margin="normal"
+            onChange={this.handleChange(property.key)}
+          />
+          <Button variant="fab"
+                  aria-label="delete"
+                  className={classes.button}
+                  onClick={()=>this.deleteProperty(property, index)}>
+            <DeleteIcon />
+          </Button>
+        </div>
+    )});
 
     return (<React.Fragment>
       {finalCompo}
@@ -84,4 +116,8 @@ class PropertiesForm extends React.Component {
   }
 }
 
-export default PropertiesForm;
+PropertiesForm.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(PropertiesForm);

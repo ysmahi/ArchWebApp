@@ -9,3 +9,7 @@
 .ModelNavigatorManager ul li div ul li div{
     display: flex;
 }
+
+.property {
+    display: flex;
+}

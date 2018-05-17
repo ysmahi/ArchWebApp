@@ -24,12 +24,13 @@ class ElementForm extends React.Component {
     this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
 
     this.state = {
-      nameElement: 'Name',
-      typeElement: 'typeElement',
-      idElement:'ID',
-      documentationElement: 'Write documentation here',
-      propertiesElement: [],
+      nameElement: this.props.nameElement,
+      typeElement: this.props.typeElement,
+      idElement: this.props.idElement,
+      documentationElement: this.props.documentationElement,
+      propertiesElement: this.props.propertiesElement,
       displayPropertiesAdding: false,
+      newElement: this.props.newElement,
     }
   }
 
@@ -55,19 +56,12 @@ class ElementForm extends React.Component {
     this.setState({propertiesElement: arrayProperties});
   }
 
-  /* Retrieves properties in child and pass them to the pushChanges parent method so that a push to github is done */
-  pushChanges = () => {
-    let arrayProperties = this.refPropForm.getArrayProperties();
+  componentDidMount() {
+    this.props.onRef(this);
+  }
 
-    this.props.pushChanges(this.state.nameElement,
-      this.state.idElement,
-      this.state.documentationElement,
-      arrayProperties,
-    );
-
-    this.setState({
-      propertiesElement: arrayProperties,
-    });
+  componentWillUnmount () {
+    this.props.onRef(undefined);
   }
 
   componentDidUpdate() {
@@ -78,7 +72,6 @@ class ElementForm extends React.Component {
         idElement: this.props.idElement,
         documentationElement: this.props.documentationElement,
         propertiesElement: this.props.propertiesElement,
-        hasProperties: this.props.hasProperties,
       })
     }
   }
@@ -105,6 +98,7 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
+          disabled={!this.state.newElement}
           value={this.state.typeElement}
           onChange={this.handleChange('typeElement')}
           fullWidth
@@ -116,6 +110,7 @@ class ElementForm extends React.Component {
           InputLabelProps={{
             shrink: true,
           }}
+          disabled={!this.state.newElement}
           value={this.state.idElement}
           onChange={this.handleChange('idElement')}
           fullWidth
@@ -150,8 +145,14 @@ class ElementForm extends React.Component {
                   onClick={()=>this.setState({displayPropertiesAdding: true})}>
             Add properties
           </Button>
+            {this.state.newElement && (
+              <Button size="medium" className={classes.button}
+                      onClick={()=>this.submitElement()}>
+                Submit element
+              </Button>
+            )}
           <Button size="medium" className={classes.button}
-                  onClick={this.pushChanges}>
+                  onClick={this.props.pushChanges}>
             Push changes
           </Button>
         </div>)}

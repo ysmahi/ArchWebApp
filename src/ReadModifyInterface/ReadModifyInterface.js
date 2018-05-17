@@ -1,14 +1,18 @@
 import React from 'react'
 import ModelNavigatorManager from './ModelNavigatorManager'
 import ElementForm from './ElementForm'
-import { withStyles } from 'material-ui'
+import { Button, withStyles } from 'material-ui'
 import './ReadModifyInterface.css'
 import PropTypes from 'prop-types'
 import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
 import { json2xml } from 'xml-js'
 import * as cookie from 'react-cookies'
+import AddIcon from '@material-ui/icons/Add'
 
 const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit,
+  },
 });
 
 class ReadModifyInterface extends React.Component {
@@ -17,14 +21,15 @@ class ReadModifyInterface extends React.Component {
 
     this.dataElementHandler = this.dataElementHandler.bind(this);
     this.pushChanges = this.pushChanges.bind(this);
+    this.folderClickHandler = this.folderClickHandler.bind(this);
 
     this.state = {
-      displayedElementForm: '',
       nameElement: 'Name',
       idElement: 'ID',
       typeElement: 'Type of Element',
       documentationElement: 'Write documentation here',
       properties: [],
+      displayedElementScreen:'' // can be 'create element', 'existing element form', 'new element'
     }
   }
 
@@ -51,13 +56,23 @@ class ReadModifyInterface extends React.Component {
       documentationElement: documentation,
       propertiesElement: properties,
       pathElement: pathElement,
+      displayedElementScreen: 'existing element form'
     });
+  }
+
+  /* Called when a folder was clicked in treeview and we want create a new element button to appear */
+  folderClickHandler = () => {
+    if(this.state.displayedElementScreen !== 'create element') {
+      this.setState({displayedElementScreen: 'create element',});
+    }
   }
 
   /* Commits the changes in the element information to the github repo */
   pushChanges = (nameElement, idElement, documentationElement, propertiesElement) => {
     let token = cookie.load('token');
+    console.log('state', this.state);
 
+    /*
     getBlobSha('ysmahi', 'ArchiTest', this.state.pathElement)
       .then(blobSha => {
         let jsonElement = {"elements":
@@ -97,27 +112,73 @@ class ReadModifyInterface extends React.Component {
         updateElementInfo('ysmahi', 'ArchiTest', this.state.pathElement, finalXml.join('').concat('\n'),
           blobSha, token, "Axios commit message", "Yazid Smahi", "yazidsmahi@gmail.com");
     })
+    */
   }
 
+  /* Set state so that component renders an empty new element form */
+  displayNewElementForm = () => {
+    this.setState({displayedElementScreen: 'new element form'});
+  }
+
+  /* Retrieves properties in child and pass them to the pushChanges parent method so that a push to github is done */
+  pushChanges = () => {
+    let arrayProperties = this.refElementForm.getArrayProperties();
+
+    this.props.pushChanges(this.state.nameElement,
+      this.state.idElement,
+      this.state.documentationElement,
+      arrayProperties,
+    );
+
+    this.setState({
+      propertiesElement: arrayProperties,
+    });
+  }
 
   render() {
+    const { classes } = this.props;
 
     return (
       <div className="TreeFormContainer">
         <div className='ModelNavigatorManager'>
           <ModelNavigatorManager
-          dataElementHandler={this.dataElementHandler}/>
+          dataElementHandler={this.dataElementHandler}
+          folderClickNotifier={this.folderClickHandler}/>
         </div>
-        <div className='ElementForm'>
-          <ElementForm nameElement={this.state.nameElement}
-                       typeElement={this.state.typeElement}
-                       idElement={this.state.idElement}
-                       documentationElement={this.state.documentationElement}
-                       propertiesElement={this.state.propertiesElement}
-                       hasProperties={this.state.elementHasProperties}
-                       pushChanges={this.pushChanges}
-          />
-        </div>
+        {this.state.displayedElementScreen === 'create element' && (
+          <div className = 'ElementForm'>
+            <Button className={classes.button}
+                    variant="raised"
+                    color="primary"
+                    onClick={()=>this.displayNewElementForm()}>
+              Create Element
+              <AddIcon className={classes.leftIcon} />
+            </Button>
+          </div>
+        )}
+        {this.state.displayedElementScreen === 'existing element form' && (
+          <div className='ElementForm'>
+            <ElementForm nameElement={this.state.nameElement}
+                         typeElement={this.state.typeElement}
+                         idElement={this.state.idElement}
+                         documentationElement={this.state.documentationElement}
+                         propertiesElement={this.state.propertiesElement}
+                         pushChanges={this.pushChanges}
+                         newElement={false}
+            />
+          </div>)}
+        {this.state.displayedElementScreen === 'new element form' && (
+          <div className='ElementForm'>
+            <ElementForm nameElement=''
+                         typeElement=''
+                         idElement=''
+                         documentationElement=''
+                         propertiesElement={[]}
+                         pushChanges={this.pushChanges}
+                         newElement={true}
+                         onRef={ref => (this.refElementForm = ref)}
+            />
+          </div>)}
       </div>
     );
   }

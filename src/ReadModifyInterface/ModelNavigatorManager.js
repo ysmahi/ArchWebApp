@@ -121,6 +121,9 @@ class ModelNavigatorManager extends React.Component {
       if (!this.state.alreadyToggled.includes(node.id)) {
         // Checks if node already opened to avoid doing unnecessary requests
 
+        // Notifies parent that a folder was clicked
+        this.props.folderClickNotifier();
+
         // Filter to go only in folder children to find folder.xml
         let arrPromises = node.children.filter(child => child.children.length > 0)
           .map(child => {

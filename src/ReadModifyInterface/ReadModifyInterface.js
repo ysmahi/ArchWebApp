@@ -55,6 +55,7 @@ class ReadModifyInterface extends React.Component {
     });
   }
 
+  /* Commits the changes in the element information to the github repo */
   pushChanges = (nameElement, idElement, documentationElement, propertiesElement) => {
     let token = cookie.load('token');
 

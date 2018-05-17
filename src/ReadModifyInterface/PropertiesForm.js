@@ -45,8 +45,15 @@ class PropertiesForm extends React.Component {
     }
   }
 
+  /* Updates state of array of properties and returns the new array */
   getArrayProperties = () => {
-    return this.state.arrayProperties;
+    let arrayProperties = this.state.arrayProperties.map(property=>{
+      return {key: property.key,
+      value: this.state[property.key]}
+    });
+
+    this.setState({arrayProperties: arrayProperties});
+    return arrayProperties;
   }
 
   handleChange = name => event => {
@@ -56,7 +63,6 @@ class PropertiesForm extends React.Component {
   };
 
   render () {
-    console.log('arrarar', this.state.arrayProperties);
     let finalCompo = this.state.arrayProperties.map((property, index) => (
       <TextField
         id="full-width"

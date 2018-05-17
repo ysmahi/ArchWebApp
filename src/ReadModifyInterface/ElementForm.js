@@ -32,6 +32,7 @@ class ElementForm extends React.Component {
     }
   }
 
+  /* Updates state in real time when user types in a text field */
   handleChange = name => event => {
     this.setState({
       [name]: event.target.value,
@@ -41,9 +42,25 @@ class ElementForm extends React.Component {
   /* Imposes re-render so that the new property is taken into account
    * Called by child component AddPropertiesForm */
   handleNewProperty = (jsonKeyValue) => {
+    let arrayProperties = this.refPropForm.getArrayProperties();
     this.setState({
-      propertiesElement: this.state.propertiesElement.concat(jsonKeyValue),
+      propertiesElement: arrayProperties.concat(jsonKeyValue),
       displayPropertiesAdding: false,
+    });
+  }
+
+  /* Retrieves properties in child and pass them to the pushChanges parent method so that a push to github is done */
+  pushChanges = () => {
+    let arrayProperties = this.refPropForm.getArrayProperties();
+
+    this.props.pushChanges(this.state.nameElement,
+      this.state.idElement,
+      this.state.documentationElement,
+      arrayProperties,
+    );
+
+    this.setState({
+      propertiesElement: arrayProperties,
     });
   }
 
@@ -62,6 +79,7 @@ class ElementForm extends React.Component {
 
   render () {
     const { classes } = this.props;
+    console.log('statta', this.state);
 
     return (
       <div>
@@ -127,11 +145,7 @@ class ElementForm extends React.Component {
             Add properties
           </Button>
           <Button size="medium" className={classes.button}
-                  onClick={()=>this.props.pushChanges(this.state.nameElement,
-                    this.state.idElement,
-                    this.state.documentationElement,
-                    this.state.propertiesElement
-                  )}>
+                  onClick={this.pushChanges}>
             Push changes
           </Button>
         </div>)}

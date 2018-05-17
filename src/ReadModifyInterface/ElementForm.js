@@ -21,6 +21,7 @@ class ElementForm extends React.Component {
     super(props);
 
     this.handleNewProperty = this.handleNewProperty.bind(this);
+    this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
 
     this.state = {
       nameElement: 'Name',
@@ -41,12 +42,17 @@ class ElementForm extends React.Component {
 
   /* Imposes re-render so that the new property is taken into account
    * Called by child component AddPropertiesForm */
-  handleNewProperty = (jsonKeyValue) => {
+  handleNewProperty = (newProperty) => {
     let arrayProperties = this.refPropForm.getArrayProperties();
     this.setState({
-      propertiesElement: arrayProperties.concat(jsonKeyValue),
+      propertiesElement: arrayProperties.concat(newProperty),
       displayPropertiesAdding: false,
     });
+  }
+
+  /* Deletes property by modifying property array in state */
+  handleDeleteProperty = (arrayProperties) => {
+    this.setState({propertiesElement: arrayProperties});
   }
 
   /* Retrieves properties in child and pass them to the pushChanges parent method so that a push to github is done */
@@ -79,7 +85,6 @@ class ElementForm extends React.Component {
 
   render () {
     const { classes } = this.props;
-    console.log('statta', this.state);
 
     return (
       <div>
@@ -132,6 +137,7 @@ class ElementForm extends React.Component {
         <div>
           <PropertiesForm arrayProperties={this.state.propertiesElement}
                           idElement={this.state.idElement}
+                          deleteProperty={this.handleDeleteProperty}
                           onRef={ref => (this.refPropForm = ref)}/>
         </div>
         {this.state.displayPropertiesAdding && (

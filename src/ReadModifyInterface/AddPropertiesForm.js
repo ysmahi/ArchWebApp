@@ -73,7 +73,7 @@ class AddPropertiesForm extends React.Component {
                 color="primary"
                 aria-label="add"
                 className={classes.button}
-                onClick={this.addNewProperty}>
+                onClick={()=>this.addNewProperty()}>
           <AddIcon />
         </Button>
       </div>

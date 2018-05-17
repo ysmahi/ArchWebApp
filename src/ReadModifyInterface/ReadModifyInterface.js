@@ -7,7 +7,6 @@ import PropTypes from 'prop-types'
 import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
 import { json2xml } from 'xml-js'
 import * as cookie from 'react-cookies'
-import * as formatXml from 'xml-formatter'
 
 const styles = theme => ({
 });

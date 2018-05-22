@@ -5,6 +5,7 @@ import ReadModifyInterface from './ReadModifyInterface/ReadModifyInterface'
 import { getToken } from './Utils/GithubApiCall'
 import cookie from 'react-cookies'
 import PropTypes from 'prop-types'
+import QueryInterface from './QueryInterface/QueryInterface'
 
 const githubAppId = 'a256b8d17f75ee274bf3';
 
@@ -18,7 +19,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     
-    this.state = {};
+    this.state = {
+      displayedScreen: 'Query Interface',
+    };
 
     this.redirectToGithub = this.redirectToGithub.bind(this);
 
@@ -48,9 +51,13 @@ class App extends Component {
 
     return (<div className="App">
         <MuiThemeProvider>
-        {hasToken && (
+        {hasToken && this.state.displayedScreen === 'Read or Modif Interface' && (
         <div>
           <ReadModifyInterface />
+        </div>)}
+        {hasToken && this.state.displayedScreen === 'Query Interface' && (
+        <div>
+          <QueryInterface />
         </div>)}
         {!hasToken && (
           <Button size="medium" className={classes.button}

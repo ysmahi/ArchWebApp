@@ -4,10 +4,10 @@ import ElementForm from './ElementForm'
 import { Button, withStyles } from 'material-ui'
 import './ReadModifyInterface.css'
 import PropTypes from 'prop-types'
-import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
-import { json2xml } from 'xml-js'
 import * as cookie from 'react-cookies'
 import AddIcon from '@material-ui/icons/Add'
+import { getBlobSha, updateElementInfo } from '../Utils/GithubApiCall'
+import { json2xml } from 'xml-js'
 
 const styles = theme => ({
   button: {
@@ -69,10 +69,9 @@ class ReadModifyInterface extends React.Component {
 
   /* Commits the changes in the element information to the github repo */
   pushChanges = (nameElement, idElement, documentationElement, propertiesElement) => {
-    let token = cookie.load('token');
     console.log('state', this.state);
+    let token = cookie.load('token');
 
-    /*
     getBlobSha('ysmahi', 'ArchiTest', this.state.pathElement)
       .then(blobSha => {
         let jsonElement = {"elements":
@@ -112,7 +111,6 @@ class ReadModifyInterface extends React.Component {
         updateElementInfo('ysmahi', 'ArchiTest', this.state.pathElement, finalXml.join('').concat('\n'),
           blobSha, token, "Axios commit message", "Yazid Smahi", "yazidsmahi@gmail.com");
     })
-    */
   }
 
   /* Set state so that component renders an empty new element form */
@@ -190,7 +188,7 @@ ReadModifyInterface.propTypes = {
 
 export default withStyles(styles)(ReadModifyInterface);
 
-String.prototype.replaceAll = function(search, replacement) {
-  var target = this;
+String.prototype.replaceAll = function(search, replacement){
+  let target = this;
   return target.split(search).join(replacement);
 };

@@ -4,6 +4,12 @@ import PropTypes from 'prop-types'
 import Button from '@material-ui/core/Button';
 import Send from '@material-ui/icons/Send';
 import { getBranchSha, getElementContent, getNodeTreeRecursive } from '../Utils/GithubApiCall'
+import { xml2json } from 'xml-js'
+import * as cookie from 'react-cookies'
+import * as alasql from 'alasql'
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
 
 const styles = theme => ({
   textField: {
@@ -25,7 +31,8 @@ class QueryInterface extends React.Component {
 
     this.state = {
       query: '',
-      result: '',
+      response: '',
+      tablesCreated: false,
     };
   }
 
@@ -38,38 +45,124 @@ class QueryInterface extends React.Component {
 
   /* Launches query by creating tables and then querying them with the query in state */
   launchQuery = () => {
-    let tableElements = [], tableProperties = [], relationProperties = [];
-    let username = 'ysmahi', repoName = 'ArchiTest';
+    if(this.state.tablesCreated) {
+      let response = alasql(this.state.query);
+      console.log('response', response);
+      this.setState({response: response});
+    }
 
-    // Retrieves data in the github repo
-    getBranchSha(username, repoName, 'master')
-      .then(sha=>{
-        getNodeTreeRecursive(username, repoName, sha)
-          .then(tree=>{
-            // Get rid of all paths other than those from elements
-            let pathElements = tree
-              .filter(el=>(!el.path.includes('folder.xml')
-                && !el.path.includes('README')
-                && el.path.includes('.xml')
-                && !el.path.includes('relations/')
-                && !el.path.includes('diagrams/')))
-              .map(el=>el.path);
-            console.log('pathElmeents : ', pathElements);
+    else {
+      let username = 'ysmahi', repoName = 'ArchiTest';
+      let token = cookie.load('token');
 
-            let arrPromises = pathElements
-              .map(path => {
-                return new Promise((resolve, reject) => {
-                  resolve(getElementContent(username, repoName, path));
+      // Retrieves data in the github repo
+      getBranchSha(username, repoName, 'master', token)
+        .then(sha => {
+          getNodeTreeRecursive(username, repoName, sha, token)
+            .then(tree => {
+              // Build array of element paths
+              let pathElements = tree
+                .filter(el => (!el.path.includes('folder.xml')
+                  && el.path.includes('.xml')
+                  && !el.path.includes('relations/')
+                  && !el.path.includes('diagrams/')))
+                .map(el => el.path);
+
+              // build array of relations paths
+              let pathRelations = tree
+                .filter(el => (!el.path.includes('folder.xml')
+                  && el.path.includes('.xml')
+                  && el.path.includes('relations/')
+                  && !el.path.includes('diagrams/')))
+                .map(el => el.path);
+              console.log('pathEl', pathElements);
+              console.log('pathRelations', pathRelations);
+
+              let arrPromises = pathElements
+                .map(path => {
+                  return new Promise((resolve, reject) => {
+                    resolve(getElementContent(username, repoName, path, token));
+                  })
+                });
+
+              Promise.all(arrPromises)
+                .then(contents => {
+                  // build an array with elements data
+                  let decodedContents = contents.map(content => JSON.parse(xml2json(atob(content))));
+                  let arrayElements = decodedContents.map(el => {
+                    return {
+                      id: el.elements[0].attributes.id,
+                      type: el.elements[0].name,
+                      name: el.elements[0].attributes.name
+                    }
+                  });
+
+                  // build an array of element properties
+                  let arrayProperties = decodedContents.filter(el => el.elements[0].hasOwnProperty('elements'))
+                    .map(el => {
+                      console.log(el);
+                      return el.elements[0].elements.map(elProp => {
+                        return {
+                          id: el.elements[0].attributes.id,
+                          key: elProp.attributes.key,
+                          value: elProp.attributes.value,
+                        }
+                      })
+                    })
+                    .reduce((arr1, arr2) => arr1.concat(arr2), []);
+
+                  // Build array of Promises that will return content of relations
+                  let arrPromisesRelations = pathRelations
+                    .map(path => {
+                      return new Promise((resolve, reject) => {
+                        resolve(getElementContent(username, repoName, path, token));
+                      })
+                    });
+
+                  Promise.all(arrPromisesRelations)
+                    .then(contents => {
+                      // build an array with relations data
+                      let decodedRel = contents.map(content => JSON.parse(xml2json(atob(content))));
+                      let arrayRelations = decodedRel.map(el => {
+                        let nameRel = '';
+                        if(typeof el.elements[0].attributes.name!=='undefined'){
+                          nameRel = el.elements[0].attributes.name;
+                        }
+                        console.log('elelele', el);
+                        return {
+                          id: el.elements[0].attributes.id,
+                          type: el.elements[0].name.split(':')[1],
+                          name: nameRel,
+                          source: el.elements[0].elements[0].attributes.href.split("#")[1],
+                          target:el.elements[0].elements[1].attributes.href.split("#")[1],
+                        }
+                      });
+
+                      console.log('array Pprop', arrayRelations);
+
+                      // Create tables
+                      alasql('CREATE TABLE Elements');
+                      alasql('CREATE TABLE Properties');
+                      alasql('CREATE TABLE Relations');
+
+                      // Fill tables
+                      alasql.tables.Elements.data = arrayElements;
+                      alasql.tables.Properties.data = arrayProperties;
+                      alasql.tables.Relations.data = arrayRelations;
+
+                      // Return query response
+                      let response = alasql(this.state.query);
+                      console.log('response', response);
+                      this.setState({response: response,
+                        tablesCreated:true,});
+
+                    })
+
                 })
-              });
 
-            /* Promise.all(arrPromises)
-              .then(content=>{
-                // elements
-              }) */
-
-          })
-      })
+            })
+        })
+    }
 
   }
 
@@ -97,6 +190,16 @@ class QueryInterface extends React.Component {
           Launch Query
           <Send className={classes.rightIcon}/>
         </Button>
+        {this.state.response !== '' && (
+          <FormControl fullWidth className={classes.margin}>
+            <InputLabel htmlFor="adornment-amount">Response</InputLabel>
+            <Input
+              id="queryResponse"
+              multiline
+              value={JSON.stringify(this.state.response, null, 4)}
+              onChange={this.handleChange('response')}
+            />
+          </FormControl>)}
       </div>
     )
   }

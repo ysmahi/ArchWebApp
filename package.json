@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^1.0.0-rc.1",
     "@material-ui/icons": "^1.0.0-beta.43",
+    "alasql": "^0.4.5",
     "axios": "^0.18.0",
     "i": "^0.3.6",
     "lodash": "^4.17.10",

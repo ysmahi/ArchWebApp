@@ -21,17 +21,31 @@ export let getToken = () => {
     })
 }
 
-export let getBranchSha = (username, repoName, branchName) => {
+export let getBranchSha = (username, repoName, branchName, token='') => {
   return new Promise(
     (resolve, reject) => {
+      if (token.localeCompare('') === 0){
       axios.get(apiUrl + reposUrl + username + '/' + repoName + '/branches/' + branchName)
         .then((response) => {
-          if(response.status === 200) {
+          if (response.status === 200) {
             let branchSha = response.data.commit.sha;
             resolve(branchSha);
             reject('Error in getBranchSha');
           }
         })
+      }
+
+      else {
+        axios.get(apiUrl + reposUrl + username + '/' + repoName + '/branches/' + branchName,
+          {headers : {Authorization: 'Bearer ' + token}})
+          .then((response) => {
+            if (response.status === 200) {
+              let branchSha = response.data.commit.sha;
+              resolve(branchSha);
+              reject('Error in getBranchSha');
+            }
+          })
+      }
     }
   )
 }
@@ -51,31 +65,56 @@ export let getBlobSha = (username, repoName, blobPath) => {
   )
 }
 
-export let getNodeTreeRecursive = (username, repoName, BranchSha) => {
+export let getNodeTreeRecursive = (username, repoName, BranchSha, token = '') => {
   return new Promise(
     (resolve, reject) => {
-      axios.get(apiUrl + reposUrl + username + '/' + repoName + '/git/trees/' + BranchSha + '?recursive=1')
-        .then((response) => {
-          if(response.status === 200) {
-            resolve(response.data.tree);
-            reject('Error in getNodeTreeRecursive');
-          }
-        })
+      if (token.localeCompare('') === 0) {
+        axios.get(apiUrl + reposUrl + username + '/' + repoName + '/git/trees/' + BranchSha + '?recursive=1')
+          .then((response) => {
+            if (response.status === 200) {
+              resolve(response.data.tree);
+              reject('Error in getNodeTreeRecursive');
+            }
+          })
+      }
+
+      else {
+        axios.get(apiUrl + reposUrl + username + '/' + repoName + '/git/trees/' + BranchSha + '?recursive=1',
+          {headers : {Authorization: 'Bearer ' + token}})
+          .then((response) => {
+            if (response.status === 200) {
+              resolve(response.data.tree);
+              reject('Error in getNodeTreeRecursive');
+            }
+          })
+      }
     }
   )
 }
 
-export let getElementContent = (username, repoName, pathElement) => {
+export let getElementContent = (username, repoName, pathElement, token='') => {
   return new Promise(
     (resolve, reject) => {
-      axios.get(apiUrl + reposUrl + username + '/' + repoName + '/contents/' + pathElement)
-        .then((response) => {
-          if (response.status === 200)
-          {
-            resolve(response.data.content);
-            reject('Error in getElementContent');
-          }
-        })
+      if (token.localeCompare('') === 0) {
+        axios.get(apiUrl + reposUrl + username + '/' + repoName + '/contents/' + pathElement)
+          .then((response) => {
+            if (response.status === 200) {
+              resolve(response.data.content);
+              reject('Error in getElementContent');
+            }
+          })
+      }
+
+      else {
+        axios.get(apiUrl + reposUrl + username + '/' + repoName + '/contents/' + pathElement,
+          {headers : {Authorization: 'Bearer ' + token}})
+          .then((response) => {
+            if (response.status === 200) {
+              resolve(response.data.content);
+              reject('Error in getElementContent');
+            }
+          })
+      }
     }
   )
 }
@@ -97,6 +136,7 @@ export let updateElementInfo = (owner, repo, branchOrElementPath, content, sha, 
 
     axios.put('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + branchOrElementPath,
       jsonData,
+      // Put personal github token after Bearer
       {headers : {'Authorization': 'Bearer ',
           'Content-Type': 'application/json'}})
       .then((response) => {
